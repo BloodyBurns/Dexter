@@ -161,16 +161,26 @@ Signals = Signals or setmetatable({}, {
 })
 
 GetChildren = function(dataModel, filter)
-    local children = not filter and dataModel:GetChildren() or {}
-    if filter and type(filter, 'table') and #filter ~= 0 then
-        for x, v in dataModel:GetChildren() do
-            for y, z in filter do
-                if type(z[1], 'string') and v:IsA(z[1]) then
-                    if not z[2] then table.insert(children, v) continue end
-                    for p, h in z[2] do
-                        if v[p] == h then
-                            table.insert(children, v)
-                        end
+    if not filter then return dataModel:GetChildren() end
+    if not type(filter, 'table') or #filter == 0 then return {} end
+
+    local children = {}
+    local dataModelChildren = dataModel:GetChildren()
+
+    for x, v in dataModelChildren do
+        for x, y in ipairs(filter) do
+            local Type, Properties = y[1], y[2]
+
+            if type(Type, 'string') and v:IsA(Type) then
+                if not Properties then
+                    table.insert(children, v)
+                    break
+                end
+
+                for name, value in pairs(Properties) do
+                    if v[name] == value then
+                        table.insert(children, v)
+                        break
                     end
                 end
             end
@@ -180,22 +190,32 @@ GetChildren = function(dataModel, filter)
 end
 
 GetDescendants = function(dataModel, filter)
-    local children = not filter and dataModel:GetChildren() or {}
-    if filter and type(filter, 'table') and #filter ~= 0 then
-        for x, v in dataModel:GetDescendants() do
-            for y, z in filter do
-                if type(z[1], 'string') and v:IsA(z[1]) then
-                    if not z[2] then table.insert(children, v) continue end
-                    for p, h in z[2] do
-                        if v[p] == h then
-                            table.insert(children, v)
-                        end
+    if not filter then return dataModel:GetDescendants() end
+    if not type(filter, 'table') or #filter == 0 then return {} end
+
+    local descendants = {}
+    local dataModelDescendants = dataModel:GetDescendants()
+
+    for x, v in ipairs(descendants) do
+        for x, z in ipairs(filter) do
+            local Type, Properties = z[1], z[2]
+
+            if type(Type, 'string') and v:IsA(Type) then
+                if not filterProperties then
+                    table.insert(descendants, v)
+                    break
+                end
+
+                for name, value in pairs(Properties) do
+                    if v[name] == value then
+                        table.insert(descendants, v)
+                        break
                     end
                 end
             end
         end
     end
-    return children
+    return descendants
 end
 
 GetPlayers = function(...)
@@ -219,6 +239,16 @@ randomString = function(length)
     for i = 1, length do RandomString = `{RandomString}{string.char(math.random(48, 132))}` end
     cleanString = string.gsub((string.gsub(RandomString, '[%p+%.%z+%c+]', ' ')), ' ', '')
     return cleanString
+end
+
+GetPlayer = function(player)
+    assert('Player user required')
+
+    for x, v in plrs:GetPlayers() do
+        if v.Name:lower():sub(1, #player) == player:lower() or v.DisplayName:lower():sub(1, #player) == player:lower() then
+            return v
+        end
+    end
 end
 
 isCharacter = function(Character, Values)
