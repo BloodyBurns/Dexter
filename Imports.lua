@@ -1,8 +1,8 @@
 --[=[
 
     Link: https://github.com/BloodyBurns/Dexter/blob/main/Imports.lua
-    Src: https://raw.githubusercontent.com/BloodyBurns/Dexter/blob/main/Imports.lua
-    LS: loadstring(game:HttpGet('https://raw.githubusercontent.com/BloodyBurns/Dexter/blob/main/Imports.lua'), 'IvImports')()
+    Src: https://raw.githubusercontent.com/BloodyBurns/Dexter/refs/heads/main/Imports.lua
+    LS: loadstring(game:HttpGet('https://raw.githubusercontent.com/BloodyBurns/Dexter/refs/heads/main/Imports.lua'), 'IvImports')()
 
 ]=]
 
