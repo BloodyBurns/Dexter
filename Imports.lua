@@ -368,5 +368,5 @@ Save = function(path, data)
 end
 
 -->| Unassigned Variables Assinging
-ThemeProvider = ((function()  for x, v in GetDescendants(CoreGui, {{'Frame', {Name = 'TopBarFrame'}}}) do return v end end)())
-TopBarFrame = ThemeProvider and ThemeProvider:FindFirstChild('LeftFrame') or ThemeProvider:FindFirstChild('RightFrame')
+--> ThemeProvider = ((function()  for x, v in GetDescendants(CoreGui, {{'Frame', {Name = 'TopBarFrame'}}}) do return v end end)())
+--> TopBarFrame = ThemeProvider and ThemeProvider:FindFirstChild('LeftFrame') or ThemeProvider:FindFirstChild('RightFrame')
