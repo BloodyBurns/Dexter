@@ -299,7 +299,7 @@ TweenTP = function(Object, TeleportTo, ...)
 end
 
 purgeSignal = function(Signal, clearAfter)
-    if not type(Signal, 'RBXScriptConnection') return end
+    if not type(Signal, 'RBXScriptConnection') then return end
 
     task.spawn(function()
         task.wait(clearAfter)
