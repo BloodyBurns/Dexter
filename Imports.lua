@@ -48,7 +48,7 @@ typeof = function(object, typeValue, orValue) return not typeValue and _typeof(o
 hash = function(str) str = tostring(str) local hash = 0 for i = 1, #str do hash = (hash * 31 + string.byte(str, i)) % 2^32 end return f('%08x', hash) end
 
 -->| Signals
-Signals = Signals or setmetatable({}, {
+Signals = setmetatable({}, {
 	['__index'] = {
         Connections = {},
         isConnection = function(self, Connection)
