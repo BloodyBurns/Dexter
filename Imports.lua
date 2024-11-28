@@ -48,117 +48,119 @@ typeof = function(object, typeValue, orValue) return not typeValue and _typeof(o
 hash = function(str) str = tostring(str) local hash = 0 for i = 1, #str do hash = (hash * 31 + string.byte(str, i)) % 2^32 end return f('%08x', hash) end
 
 -->| Signals
-Signals = setmetatable({}, {
-	['__index'] = {
-        Connections = {},
-        isConnection = function(self, Connection)
-            assert(type(Connection, 'string', 'RBXScriptConnection'), 'Connection type not supported')
+Signals = function()
+    return setmetatable({}, {
+        ['__index'] = {
+            Connections = {},
+            isConnection = function(self, Connection)
+                assert(type(Connection, 'string', 'RBXScriptConnection'), 'Connection type not supported')
 
-            --> Check 1
-            if type(Connection, 'string') then
-                if self.Connections[Connection] then
-                    return true
-                end
-            end
-
-            --> Check 2
-            for x, v in self.Connections do
-                if v.Connection == Connection then
-                    return true
-                end
-            end
-            return false
-        end,
-
-		Connect = function(self, ConnectionName, Signal, Callback)
-            --> IvDebug(f('Attempting to create connection: %s\n\t\t\tSignal: %s\n\t\t\tCallback: %s', ConnectionName, tostring(Signal):split(' ')[2], tostring(Callback)))
-			assert(ConnectionName and Signal and Callback, 'Failed to establish connection: Missing Arguments')
-			assert(type(ConnectionName, 'string', 'number'), 'Failed to establish connection: Unsupported Connection Name Type')
-			assert(typeof(Signal, 'RBXScriptSignal'), 'Failed to establish connection: Invalid Signal Event')
-			assert(type(Callback, 'function'), 'Failed to establish connection: Invalid Callback Function')
-			--> if self.Connections[ConnectionName] then IvDebug(f('Overriding existing connection: %s', ConnectionName)) self.Connections[ConnectionName]:Disconnect() end
-			self.Connections[ConnectionName] = {
-				State = 'Active',
-				Signal = Signal,
-				Callback = Callback,
-				Connection = Signal:Connect(function(...)
-                    if self.Connections[ConnectionName] and self.Connections[ConnectionName].State == 'Idle' then
-                        return
+                --> Check 1
+                if type(Connection, 'string') then
+                    if self.Connections[Connection] then
+                        return true
                     end
-                    Callback(...)
-                end)
-			}
-			return self.Connections[ConnectionName].Connection
-		end,
+                end
 
-		Disconnect = function(self, Connection)
-			assert(type(Connection, 'string', 'RBXScriptConnection'), 'Failed to disconnect connection: Unsupported Connection Type')
-            local isValidConnection, connectionName
+                --> Check 2
+                for x, v in self.Connections do
+                    if v.Connection == Connection then
+                        return true
+                    end
+                end
+                return false
+            end,
 
-            --> Check 1
-            if type(Connection, 'string') then
-                if self.Connections[Connection] then
-                    self.Connections[Connection].Connection:Disconnect()
-                    self.Connections[Connection] = nil
-                    isValidConnection = true
-                    connectionName = Connection
+            Connect = function(self, ConnectionName, Signal, Callback)
+                --> IvDebug(f('Attempting to create connection: %s\n\t\t\tSignal: %s\n\t\t\tCallback: %s', ConnectionName, tostring(Signal):split(' ')[2], tostring(Callback)))
+                assert(ConnectionName and Signal and Callback, 'Failed to establish connection: Missing Arguments')
+                assert(type(ConnectionName, 'string', 'number'), 'Failed to establish connection: Unsupported Connection Name Type')
+                assert(typeof(Signal, 'RBXScriptSignal'), 'Failed to establish connection: Invalid Signal Event')
+                assert(type(Callback, 'function'), 'Failed to establish connection: Invalid Callback Function')
+                --> if self.Connections[ConnectionName] then IvDebug(f('Overriding existing connection: %s', ConnectionName)) self.Connections[ConnectionName]:Disconnect() end
+                self.Connections[ConnectionName] = {
+                    State = 'Active',
+                    Signal = Signal,
+                    Callback = Callback,
+                    Connection = Signal:Connect(function(...)
+                        if self.Connections[ConnectionName] and self.Connections[ConnectionName].State == 'Idle' then
+                            return
+                        end
+                        Callback(...)
+                    end)
+                }
+                return self.Connections[ConnectionName].Connection
+            end,
+
+            Disconnect = function(self, Connection)
+                assert(type(Connection, 'string', 'RBXScriptConnection'), 'Failed to disconnect connection: Unsupported Connection Type')
+                local isValidConnection, connectionName
+
+                --> Check 1
+                if type(Connection, 'string') then
+                    if self.Connections[Connection] then
+                        self.Connections[Connection].Connection:Disconnect()
+                        self.Connections[Connection] = nil
+                        isValidConnection = true
+                        connectionName = Connection
+                    end
+                end
+
+                --> Check 2
+                for x, v in self.Connections do
+                    if v.Connection == Connection then
+                        connectionName = x
+                        isValidConnection = true
+                        v.Connection:Disconnect()
+                        self[x] = nil
+                        break
+                    end
+                end
+
+                --> Debug?
+                --> if not connectionName then IvDebug('Connection does not exist within haystack:', Connection) return end
+                --> local status = isValidConnection and 'Successfully' or 'Failed to'
+                --> local action = isValidConnection and 'disconnected' or 'disconnect'
+                --> IvDebug(f('%s %s connection: %s', status, action, connectionName))
+            end,
+
+            DisconnectAll = function(self)
+                local Connections = 0 do
+                    for x, v in self.Connections do
+                        Connections = Connections + 1
+                        v.Connection:Disconnect(x)
+                        self[x] = nil
+                    end
+                end
+                --> IvDebug(f('Successfully disconnected all connections [%d]', Connections, Connections))
+            end,
+
+            Pause = function(self, Connection)
+                assert(type(Connection, 'string', 'RBXScriptConnection'), 'Connection type not supported')
+                if not self:isConnection(Connection) then
+                    --> IvDebug('Connection does not exist within haystack:', Connection)
+                    return
+                end
+
+                if self.Connections[Connection].State == 'Active' then
+                    self.Connections[Connection].State = 'Idle'
+                end
+            end,
+
+            Resume = function(self, Connection)
+                assert(type(Connection, 'string', 'RBXScriptConnection'), 'Connection type not supported')
+                if not self:isConnection(Connection) then
+                    --> IvDebug('Connection does not exist within haystack:', Connection)
+                    return
+                end
+
+                if self.Connections[Connection].State == 'Idle' then
+                    self.Connections[Connection].State = 'Active'
                 end
             end
-
-            --> Check 2
-            for x, v in self.Connections do
-                if v.Connection == Connection then
-                    connectionName = x
-                    isValidConnection = true
-                    v.Connection:Disconnect()
-                    self[x] = nil
-                    break
-                end
-            end
-
-            --> Debug?
-            --> if not connectionName then IvDebug('Connection does not exist within haystack:', Connection) return end
-            --> local status = isValidConnection and 'Successfully' or 'Failed to'
-            --> local action = isValidConnection and 'disconnected' or 'disconnect'
-            --> IvDebug(f('%s %s connection: %s', status, action, connectionName))
-		end,
-
-		DisconnectAll = function(self)
-			local Connections = 0 do
-				for x, v in self.Connections do
-                    Connections = Connections + 1
-                    v.Connection:Disconnect(x)
-                    self[x] = nil
-				end
-			end
-            --> IvDebug(f('Successfully disconnected all connections [%d]', Connections, Connections))
-		end,
-
-		Pause = function(self, Connection)
-            assert(type(Connection, 'string', 'RBXScriptConnection'), 'Connection type not supported')
-            if not self:isConnection(Connection) then
-                --> IvDebug('Connection does not exist within haystack:', Connection)
-                return
-            end
-
-			if self.Connections[Connection].State == 'Active' then
-				self.Connections[Connection].State = 'Idle'
-			end
-		end,
-
-		Resume = function(self, Connection)
-			assert(type(Connection, 'string', 'RBXScriptConnection'), 'Connection type not supported')
-            if not self:isConnection(Connection) then
-                --> IvDebug('Connection does not exist within haystack:', Connection)
-                return
-            end
-
-			if self.Connections[Connection].State == 'Idle' then
-				self.Connections[Connection].State = 'Active'
-			end
-		end
-	}
-})
+        }
+    })
+end
 
 GetChildren = function(dataModel, filter)
     if not filter then return dataModel:GetChildren() end
