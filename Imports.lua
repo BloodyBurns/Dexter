@@ -306,16 +306,16 @@ Drag = function(Frame, Speed)
     table.insert(Connections, Heartbeat:Connect(function(isActive)
         if not Settings.Pos then return end
         if not Settings.Drag and Settings.GPos then
-            local Output1 = math(Frame.Position.X.Offset, Settings.GPos.X.Offset, isActive * Settings.DragSpeed)
-            local Output2 = math(Frame.Position.Y.Offset, Settings.GPos.Y.Offset, isActive * Settings.DragSpeed)
+            local Output1 = maath(Frame.Position.X.Offset, Settings.GPos.X.Offset, isActive * Settings.DragSpeed)
+            local Output2 = maath(Frame.Position.Y.Offset, Settings.GPos.Y.Offset, isActive * Settings.DragSpeed)
             Frame.Position = UDim2.new(Settings.Pos.X.Scale, Output1, Settings.Pos.Y.Scale, Output2)
             return
         end
 
         local GMD = (Settings.MPos - InputService:GetMouseLocation())
         local x, y = (Settings.Pos.X.Offset - GMD.X), (Settings.Pos.Y.Offset - GMD.Y)
-        local Output1 = math(Frame.Position.X.Offset, x, isActive * Settings.DragSpeed)
-        local Output2 = math(Frame.Position.Y.Offset, y, isActive * Settings.DragSpeed)
+        local Output1 = maath(Frame.Position.X.Offset, x, isActive * Settings.DragSpeed)
+        local Output2 = maath(Frame.Position.Y.Offset, y, isActive * Settings.DragSpeed)
         Settings.GPos = UDim2.new(Settings.Pos.X.Scale, x, Settings.Pos.Y.Scale, y)
         Frame.Position = UDim2.new(Settings.Pos.X.Scale, Output1, Settings.Pos.Y.Scale, Output2)
     end))
