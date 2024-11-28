@@ -39,7 +39,7 @@ MessageRequest = ReplicatedStorage:FindFirstChild('SayMessageRequest', true)
 local _type, _typeof = type, typeof
 
 --> local IvDebug = function(...) warn('[Iv Library Debugger]:\n\t', ...) end
-GetObjects = function(asset) return game:GetObjects(`rbxassetid://{asset}`) end
+GetObjects = function(asset) return game:GetObjects(`rbxassetid://{asset}`)[1] end
 f = function(pattern, ...) return pattern:format(...) end
 JSON = function(method, data) return method == 'Encode' and HttpService:JSONEncode(data) or HttpService:JSONDecode(data) end
 pfp = function(playerUserID) return plrs:GetUserThumbnailAsync(playerUserID, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size420x420) end
