@@ -164,10 +164,10 @@ SignalRegistry = function()
 end
 
 registerTableMethods = function(modTable, tableType)
-    assert(type(modTable, 'table'), 'Argumenet 1 must be a table [registerTableMethods]') return end
+    assert(type(modTable, 'table'), 'Argument 1 must be a table [registerTableMethods]') 
     if tableType ~= 'list' or tableType ~= 'map' then
         tableType = 'list'
-        warn('TableRegistry: Table type error detected. Defaulting to 'list' for compatibility')
+        warn('TableRegistry: Table type error detected. Defaulting to list for compatibility')
     end
 
     local isList = tableType == 'list'
@@ -179,7 +179,7 @@ registerTableMethods = function(modTable, tableType)
                 end
             end,
 
-            remove = function(self, x, )
+            remove = function(self, x)
                 if isList then table.remove(modTable, x) else
                     modTable[x] = nil
                 end
@@ -226,6 +226,7 @@ registerTableMethods = function(modTable, tableType)
         }
     })
 end
+
 GetChildren = function(dataModel, filter)
     if not filter then return dataModel:GetChildren() end
     if not type(filter, 'table') or #filter == 0 then return {} end
