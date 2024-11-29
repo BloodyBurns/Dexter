@@ -49,21 +49,20 @@ hash = function(str) str = tostring(str) local hash = 0 for i = 1, #str do hash 
 
 -->| Signals
 SignalRegistry = function()
-    return setmetatable({}, {
+    local Connections = {} setmetatable(Connections, {
         ['__index'] = {
-            Connections = {},
             isConnection = function(self, Connection)
                 assert(type(Connection, 'string', 'RBXScriptConnection'), 'Connection type not supported')
 
                 --> Check 1
                 if type(Connection, 'string') then
-                    if self.Connections[Connection] then
+                    if Connections[Connection] then
                         return true
                     end
                 end
 
                 --> Check 2
-                for x, v in self.Connections do
+                for x, v in Connections do
                     if v.Connection == Connection then
                         return true
                     end
@@ -77,19 +76,19 @@ SignalRegistry = function()
                 assert(type(ConnectionName, 'string', 'number'), 'Failed to establish connection: Unsupported Connection Name Type')
                 assert(typeof(Signal, 'RBXScriptSignal'), 'Failed to establish connection: Invalid Signal Event')
                 assert(type(Callback, 'function'), 'Failed to establish connection: Invalid Callback Function')
-                --> if self.Connections[ConnectionName] then IvDebug(f('Overriding existing connection: %s', ConnectionName)) self.Connections[ConnectionName]:Disconnect() end
-                self.Connections[ConnectionName] = {
+                --> if Connections[ConnectionName] then IvDebug(f('Overriding existing connection: %s', ConnectionName)) Connections[ConnectionName]:Disconnect() end
+                Connections[ConnectionName] = {
                     State = 'Active',
                     Signal = Signal,
                     Callback = Callback,
                     Connection = Signal:Connect(function(...)
-                        if self.Connections[ConnectionName] and self.Connections[ConnectionName].State == 'Idle' then
+                        if Connections[ConnectionName] and Connections[ConnectionName].State == 'Idle' then
                             return
                         end
                         Callback(...)
                     end)
                 }
-                return self.Connections[ConnectionName].Connection
+                return Connections[ConnectionName].Connection
             end,
 
             Disconnect = function(self, Connection)
@@ -98,21 +97,21 @@ SignalRegistry = function()
 
                 --> Check 1
                 if type(Connection, 'string') then
-                    if self.Connections[Connection] then
-                        self.Connections[Connection].Connection:Disconnect()
-                        self.Connections[Connection] = nil
+                    if Connections[Connection] then
+                        Connections[Connection].Connection:Disconnect()
+                        Connections[Connection] = nil
                         isValidConnection = true
                         connectionName = Connection
                     end
                 end
 
                 --> Check 2
-                for x, v in self.Connections do
+                for x, v in Connections do
                     if v.Connection == Connection then
                         connectionName = x
                         isValidConnection = true
                         v.Connection:Disconnect()
-                        self[x] = nil
+                        Connections[x] = nil
                         break
                     end
                 end
@@ -126,10 +125,10 @@ SignalRegistry = function()
 
             DisconnectAll = function(self)
                 local Connections = 0 do
-                    for x, v in self.Connections do
+                    for x, v in Connections do
                         Connections = Connections + 1
                         v.Connection:Disconnect(x)
-                        self[x] = nil
+                        Connections[x] = nil
                     end
                 end
                 --> IvDebug(f('Successfully disconnected all connections [%d]', Connections, Connections))
@@ -142,8 +141,8 @@ SignalRegistry = function()
                     return
                 end
 
-                if self.Connections[Connection].State == 'Active' then
-                    self.Connections[Connection].State = 'Idle'
+                if Connections[Connection].State == 'Active' then
+                    Connections[Connection].State = 'Idle'
                 end
             end,
 
@@ -154,14 +153,79 @@ SignalRegistry = function()
                     return
                 end
 
-                if self.Connections[Connection].State == 'Idle' then
-                    self.Connections[Connection].State = 'Active'
+                if Connections[Connection].State == 'Idle' then
+                    Connections[Connection].State = 'Active'
                 end
             end
         }
     })
+
+    return Connections
 end
 
+registerTableMethods = function(modTable, tableType)
+    assert(type(modTable, 'table'), 'Argumenet 1 must be a table [registerTableMethods]') return end
+    if tableType ~= 'list' or tableType ~= 'map' then
+        tableType = 'list'
+        warn('TableRegistry: Table type error detected. Defaulting to 'list' for compatibility')
+    end
+
+    local isList = tableType == 'list'
+    return setmetatable(modTable, {
+        __index = {
+            insert = function(self, x, v)
+                if isList then table.insert(modTable, x) else
+                    modTable[x] = v
+                end
+            end,
+
+            remove = function(self, x, )
+                if isList then table.remove(modTable, x) else
+                    modTable[x] = nil
+                end
+            end,
+
+            find = function(self, x)
+                if isList then table.find(modTable, x) else
+                    if modTable[x] then return x else
+                        for i, v in modTable do
+                            if v == x then
+                                return i
+                            end
+                        end
+                    end
+                end
+            end,
+
+            length = function(self)
+                if isList then return #modTable else
+                    local length = 0 do
+                        for x in modTable do
+                            length = length + 1
+                        end
+                    end
+                    return length
+                end
+            end,
+
+            clear = function(self)
+                table.clear(modTable)
+            end,
+
+            random = function(self)
+                local Objects = {}
+                if isList then Objects = modTable else
+                    for x, v in modTable do
+                        table.insert(Objects, v)
+                    end
+                end
+                
+                if #Objects == 0 then return nil end
+                return Objects[math.random(1, self:length())]
+            end
+        }
+    })
+end
 GetChildren = function(dataModel, filter)
     if not filter then return dataModel:GetChildren() end
     if not type(filter, 'table') or #filter == 0 then return {} end
