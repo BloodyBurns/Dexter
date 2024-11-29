@@ -285,6 +285,18 @@ isMe = function(object)
     return false
 end
 
+isIndexOf = function(data, value)
+    if type(data, 'table') then
+        for x, v in data do
+            if v == value then
+                return x
+            end
+        end
+    end
+
+    return false
+end
+
 Drag = function(Frame, Speed)
     if not Frame then return end
     local Settings, Connections = {Pos = nil,  Drag = nil, MPos = nil, GPos = nil, Input = nil,  DragSpeed = Speed or 5}, {}
