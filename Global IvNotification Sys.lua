@@ -32,5 +32,7 @@ getgenv().IvNotify = function(Title, Message, Type, Duration)
 	end)
 end
 
+UI.Parent = game:GetService('CoreGui')
+
 --> Usage
 --> IvNotify(Title: string, Message: string, Type: string, Duration: number?)
