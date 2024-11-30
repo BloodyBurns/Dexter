@@ -35,4 +35,5 @@ end
 UI.Parent = game:GetService('CoreGui')
 
 --> Usage
+--> Types: error, info, warning, success
 --> IvNotify(Title: string, Message: string, Type: string, Duration: number?)
