@@ -124,14 +124,15 @@ SignalRegistry = function()
             end,
 
             DisconnectAll = function(self)
-                local Connections = 0 do
+                local ConnectionsCount = 0 do
                     for x, v in Connections do
-                        Connections = Connections + 1
+                        ConnectionsCount = ConnectionsCount + 1
                         v.Connection:Disconnect(x)
                         Connections[x] = nil
                     end
                 end
                 --> IvDebug(f('Successfully disconnected all connections [%d]', Connections, Connections))
+                return connectionsCount
             end,
 
             Pause = function(self, Connection)
