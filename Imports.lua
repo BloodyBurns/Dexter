@@ -45,8 +45,18 @@ pfp = function(playerUserID) return plrs:GetUserThumbnailAsync(playerUserID, Enu
 type = function(object, typeValue, orValue) return not typeValue and _type(object) or _type(object) == typeValue or orValue and _type(object) == orValue end
 typeof = function(object, typeValue, orValue) return not typeValue and _typeof(object) or _typeof(object) == typeValue or orValue and _typeof(object) == orValue end
 hash = function(str) str = tostring(str) local hash = 0 for i = 1, #str do hash = (hash * 31 + string.byte(str, i)) % 2^32 end return f('%08x', hash) end
+isMatch = function(target, ...) for x, v in {...} do if v == target then return true end end return false end
 
--->| Signals
+--[[ 
+    Module: SignalRegistry
+    Purpose: Manage connections between signals and callbacks.
+    Methods:
+      - Connect: Connects a signal to a callback.
+      - Disconnect: Removes a connection.
+      - Pause: Temporarily halts a connection.
+      - Resume: Reactivates a paused connection.
+]]
+
 SignalRegistry = function()
     local Connections = {} setmetatable(Connections, {
         ['__index'] = {
@@ -123,7 +133,7 @@ SignalRegistry = function()
             end,
 
             DisconnectAll = function(self)
-                local ConnectionsCount = 0 do
+                local connectionsCount = 0 do
                     for x, v in Connections do
                         ConnectionsCount = ConnectionsCount + 1
                         v.Connection:Disconnect(x)
@@ -163,29 +173,41 @@ SignalRegistry = function()
     return Connections
 end
 
-registerTableMethods = function(modTable, tableType)
-    assert(type(modTable, 'table'), 'Argument 1 must be a table [registerTableMethods]') 
-    if tableType ~= 'list' or tableType ~= 'map' then
+--[[
+    Module: TableMethods
+    Purpose: Adds methods for managing ordered (list, array, sequence) and key-value (map, dictionary, hash)
+    Methods:
+      - add: Adds an element to a sequence or sets a key-value pair in a dictionary.
+      - delete: Removes an element by index (sequence) or key (dictionary).
+      - indexOf: Finds a value and returns its index (sequence) or key (dictionary).
+      - size: Returns the total number of elements.
+      - clear: Clears all elements.
+      - sample: Returns a random element.
+]]
+
+TableMethods = function(modTable, tableType)
+    assert(type(modTable, 'table'), 'Argument 1 must be a table [TableOps]')
+    if not isMatch(tableType, 'list', 'array', 'sequence', 'map', 'dictionary', 'hash') then
         tableType = 'list'
         warn('TableRegistry: Table type error detected. Defaulting to list for compatibility')
     end
 
-    local isList = tableType == 'list'
+    local isList = isMatch(tableType, 'list', 'array', 'sequence')
     return setmetatable(modTable, {
         __index = {
-            insert = function(self, x, v)
+            add = function(self, x, v)
                 if isList then table.insert(modTable, x) else
                     modTable[x] = v
                 end
             end,
 
-            remove = function(self, x)
+            delete = function(self, x)
                 if isList then table.remove(modTable, x) else
                     modTable[x] = nil
                 end
             end,
 
-            find = function(self, x)
+            indexOf = function(self, x)
                 if isList then table.find(modTable, x) else
                     if modTable[x] then return x else
                         for i, v in modTable do
@@ -197,7 +219,7 @@ registerTableMethods = function(modTable, tableType)
                 end
             end,
 
-            length = function(self)
+            size = function(self)
                 if isList then return #modTable else
                     local length = 0 do
                         for x in modTable do
@@ -209,7 +231,11 @@ registerTableMethods = function(modTable, tableType)
             end,
 
             clear = function(self)
-                table.clear(modTable)
+                if isList then table.clear(modTable) else
+                    for x in modTable do
+                        modTable[x] = nil
+                    end
+                end
             end,
 
             random = function(self)
@@ -221,7 +247,7 @@ registerTableMethods = function(modTable, tableType)
                 end
                 
                 if #Objects == 0 then return nil end
-                return Objects[math.random(1, self:length())]
+                return Objects[math.random(1, self.size)]
             end
         }
     })
@@ -398,6 +424,8 @@ Drag = function(Frame, Speed)
         Settings.GPos = UDim2.new(Settings.Pos.X.Scale, x, Settings.Pos.Y.Scale, y)
         Frame.Position = UDim2.new(Settings.Pos.X.Scale, Output1, Settings.Pos.Y.Scale, Output2)
     end))
+
+    return Connections
 end
 
 TweenTP = function(Object, TeleportTo, ...)
@@ -445,7 +473,3 @@ end
 Save = function(path, data)
     writefile(path, type(data, 'table') and JSON('Encode', data) or data)
 end
-
--->| Unassigned Variables Assinging
---> ThemeProvider = ((function()  for x, v in GetDescendants(CoreGui, {{'Frame', {Name = 'TopBarFrame'}}}) do return v end end)())
---> TopBarFrame = ThemeProvider and ThemeProvider:FindFirstChild('LeftFrame') or ThemeProvider:FindFirstChild('RightFrame')
