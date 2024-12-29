@@ -435,14 +435,14 @@ TweenTP = function(Object, TeleportTo, ...)
     end
 end
 
-purgeSignal = function(Signal, clearAfter, Callback)
+purgeSignal = function(Signal, clearAfter, Callback, ...)
     if not type(Signal, 'RBXScriptConnection') then return end
 
     task.spawn(function()
         task.wait(clearAfter)
         Signal:Disconnect()
         if type(Callback, 'function') then
-            Callback()
+            Callback(...)
         end
     end)
 end
