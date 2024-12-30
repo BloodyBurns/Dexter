@@ -135,7 +135,7 @@ SignalRegistry = function()
             DisconnectAll = function(self)
                 local connectionsCount = 0 do
                     for x, v in Connections do
-                        ConnectionsCount = ConnectionsCount + 1
+                        connectionsCount = connectionsCount + 1
                         v.Connection:Disconnect(x)
                         Connections[x] = nil
                     end
