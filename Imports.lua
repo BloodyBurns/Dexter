@@ -335,13 +335,14 @@ randomString = function(length)
 end
 
 GetPlayer = function(player)
-    assert('Player user required')
-
+    player = player:lower()
+    if isMatch(player, 'me') then return plr end
     for x, v in plrs:GetPlayers() do
-        if v.Name:lower():sub(1, #player) == player:lower() or v.DisplayName:lower():sub(1, #player) == player:lower() then
+        if v.Name:lower():sub(1, #player) == player or v.DisplayName:lower():sub(1, #player) == player then
             return v
         end
     end
+    return nil
 end
 
 isCharacter = function(Character, Values)
@@ -433,18 +434,6 @@ TweenTP = function(Object, TeleportTo, ...)
         local tween = TweenService:Create(Object, ..., {['CFrame'] = TeleportTo['CFrame']}):Play()
         return tween
     end
-end
-
-purgeSignal = function(Signal, clearAfter, Callback)
-    if not type(Signal, 'RBXScriptConnection') then return end
-
-    task.spawn(function()
-        task.wait(clearAfter)
-        Signal:Disconnect()
-        if type(Callback, 'function') then
-            Callback()
-        end
-    end)
 end
 
 --> File System
