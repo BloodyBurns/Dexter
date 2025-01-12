@@ -313,7 +313,7 @@ end
 
 GetPlayers = function(exclude)
 	exclude = type(exclude, 'table') and exclude
-	if not (exclude or exclude and #exclude == 0) then return playersX end
+	if not (exclude or exclude and #exclude == 0) then return plrs:GetPlayers() end
 
 	local players = {} do
 		for x, v in exclude do if type(v, 'string') then v = string.lower(v) end end
