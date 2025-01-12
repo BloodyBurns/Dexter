@@ -311,19 +311,37 @@ GetDescendants = function(dataModel, filter)
     return descendants
 end
 
-GetPlayers = function(...)
-    if #{...} == 0 then return plrs:GetPlayers() end
+GetPlayers = function(exclude)
+	exclude = type(exclude, 'table') and exclude
+	if not (exclude or exclude and #exclude == 0) then return playersX end
 
-    local players = {}
-    local fetchPlayers = {...}
-    for x, v in plrs:GetPlayers() do
-        for y, z in fetchPlayers do
-            if v.Name:lower():sub(1, #z) == z:lower() or v.DisplayName:lower():sub(1, #z) == z:lower() then
-                table.insert(players, v)
-            end
-        end
-    end
-    return players
+	local players = {} do
+		for x, v in exclude do if type(v, 'string') then v = string.lower(v) end end
+		for x, v in plrs:GetPlayers() do
+			for x2, v2 in exclude do
+				if not type(v2, 'string') then continue end
+				if v.Name:lower():sub(1, #v2) == v2 or v.DisplayName:lower():sub(1, #v2) == v2 then continue end
+				table.insert(players, v)
+			end
+		end
+		if #players ~= 0 then return players end
+	end
+
+	return nil
+end
+
+GetPlayer = function(player)
+	if not type(player, 'string', 'number') then return nil end
+	player = string.lower(player) do
+	    if isMatch(player, 'random') then return GetPlayers()[math.random(1, #GetPlayers())] end
+		for x, v in GetPlayers() do
+			if isMatch(v.Name:lower():sub(1, #player), player:lower())  or isMatch(v.DisplayName:lower():sub(1, #player), player:lower()) then
+				return v
+			end
+		end
+	end
+
+	return nil
 end
 
 randomString = function(length)
@@ -332,18 +350,6 @@ randomString = function(length)
     for i = 1, length do RandomString = `{RandomString}{string.char(math.random(48, 132))}` end
     cleanString = string.gsub((string.gsub(RandomString, '[%p+%.%z+%c+]', ' ')), ' ', '')
     return cleanString
-end
-
-GetPlayer = function(player)
-    player = player:lower()
-    if isMatch(player, 'me') then return plr end
-    if isMatch(player, 'random') then return GetPlayers()[math.random(1, #GetPlayers())] end
-    for x, v in plrs:GetPlayers() do
-        if v.Name:lower():sub(1, #player) == player or v.DisplayName:lower():sub(1, #player) == player then
-            return v
-        end
-    end
-    return nil
 end
 
 isCharacter = function(Character, Values)
