@@ -337,6 +337,7 @@ end
 GetPlayer = function(player)
     player = player:lower()
     if isMatch(player, 'me') then return plr end
+    if isMatch(player, 'random') then return GetPlayers()[math.random(1, #GetPlayers())] end
     for x, v in plrs:GetPlayers() do
         if v.Name:lower():sub(1, #player) == player or v.DisplayName:lower():sub(1, #player) == player then
             return v
